@@ -11,30 +11,33 @@ import SwiftUI
 
 protocol APIClientProtocol {
     func fetchCharacters(page: Int) async throws -> CharactersResponse
+    func fetchEpisode(id: Int) async throws -> Episode
 }
 
 final class APIClient: APIClientProtocol {
     
     private let session: Session = .default
     
-    func fetchCharacters(page: Int) async throws -> CharactersResponse {
-        let request = session
-            .request(MovieRouter.getCharacters(page: page))
+    private func request<T: Decodable>(_ route: MovieRouter) async throws -> T {
+        try await session
+            .request(route)
             .validate()
-        
-        let response = await request.serializingDecodable(CharactersResponse.self).response
-        
-        switch response.result {
-        case .success(let characterResponse):
-            return characterResponse
-        case .failure(let error):
-            throw error
-        }
+            .serializingDecodable(T.self)
+            .value
+    }
+    
+    func fetchCharacters(page: Int) async throws -> CharactersResponse {
+        try await request(.getCharacters(page: page))
+    }
+    
+    func fetchEpisode(id: Int) async throws -> Episode {
+        try await request(.getEpisode(id: id))
     }
 }
 
 enum MovieRouter: URLRequestConvertible {
     case getCharacters(page: Int)
+    case getEpisode(id: Int)
 
     var baseURL: URL {
         return URL(string: "https://rickandmortyapi.com/api")!
@@ -43,6 +46,7 @@ enum MovieRouter: URLRequestConvertible {
     var path: String {
         switch self {
         case .getCharacters: return "/character"
+        case .getEpisode(let id): return "/episode/\(id)"
         }
     }
     
@@ -50,12 +54,15 @@ enum MovieRouter: URLRequestConvertible {
         switch self {
         case .getCharacters(let page):
             return ["page": page]
+        case .getEpisode:
+            return nil
         }
     }
     
     var method: HTTPMethod {
         switch self {
         case .getCharacters: return .get
+        case .getEpisode: return .get
         }
     }
 
