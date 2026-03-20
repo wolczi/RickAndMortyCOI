@@ -37,7 +37,6 @@ struct CharactersListView: View {
                     listView
                 }
             }
-            .navigationTitle("Rick and Morty")
             .alert("Błąd pobierania", isPresented: $showErrorAlert) {
                 errorAlertContent
             } message: {
@@ -80,15 +79,16 @@ struct CharactersListView: View {
     
     private var initialView: some View {
         VStack(spacing: 20) {
-            Image(systemName: "person.3.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.secondary)
+            Image("rickAndMortyLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 100)
             
             VStack(spacing: 8) {
                 Text("Brak bohaterów")
                     .font(.title2.bold())
                 
-                Text("Naciśnij przycisk, aby wczytać listę postaci z serialu.")
+                Text("Naciśnij przycisk, aby wczytać listę postaci z serialu Rick and Morty.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -109,20 +109,24 @@ struct CharactersListView: View {
     private var listView: some View {
         List {
             ForEach(characters) { character in
-                HStack(spacing: 15) {
-                    KFImage(URL(string: character.image))
-                        .placeholder {  Image(systemName: "person.crop.circle.badge.exclamationmark") }
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 50, height: 50)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    
-                    Text(character.name)
-                }
-                .padding(.vertical, 4)
-                .onAppear {
-                    if character.id == characters.last?.id && hasMorePages && !isLoading {
-                        loadNextPage()
+                NavigationLink {
+                    CharacterDetailsView(character: character)
+                } label: {
+                    HStack(spacing: 15) {
+                        KFImage(URL(string: character.image))
+                            .placeholder {  Image(systemName: "person.crop.circle.badge.exclamationmark") }
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 50, height: 50)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        
+                        Text(character.name)
+                    }
+                    .padding(.vertical, 4)
+                    .onAppear {
+                        if character.id == characters.last?.id && hasMorePages && !isLoading {
+                            loadNextPage()
+                        }
                     }
                 }
             }
@@ -145,6 +149,7 @@ struct CharactersListView: View {
                 }
             }
         }
+        .navigationTitle("Lista bohaterów")
     }
     
     private func resetToInitialState() {
