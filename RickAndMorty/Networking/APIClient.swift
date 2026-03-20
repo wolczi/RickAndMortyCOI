@@ -7,6 +7,7 @@
 
 import Alamofire
 import Foundation
+import SwiftUI
 
 protocol APIClientProtocol {
     func fetchCharacters(page: Int) async throws -> CharactersResponse
@@ -64,5 +65,16 @@ enum MovieRouter: URLRequestConvertible {
         request.method = method
         
         return try URLEncoding.default.encode(request, with: parameters)
+    }
+}
+
+private struct APIClientKey: EnvironmentKey {
+    static let defaultValue: APIClientProtocol = APIClient()
+}
+
+extension EnvironmentValues {
+    var apiClient: APIClientProtocol {
+        get { self[APIClientKey.self] }
+        set { self[APIClientKey.self] = newValue }
     }
 }

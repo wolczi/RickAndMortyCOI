@@ -16,10 +16,13 @@ struct CharactersListView: View {
         case list
     }
     
-    let apiClient = APIClient()
+    @Environment(\.apiClient) private var apiClient
+    @EnvironmentObject private var favoritesManager: FavoritesManager
     
     @State private var viewState: ViewState = .initial
+    
     @State private var characters: [Character] = []
+    
     @State private var isLoading = false
     @State private var pageId = 1
     @State private var hasMorePages = true
@@ -32,77 +35,20 @@ struct CharactersListView: View {
             ZStack {
                 switch viewState {
                 case .initial:
-                    initialView
+                    InitialView(action: startInitialLoad)
                 case .list:
                     listView
                 }
             }
             .alert("Błąd pobierania", isPresented: $showErrorAlert) {
-                errorAlertContent
+                Button("Spróbuj ponownie", action: retryFetchData)
+                Button("Anuluj", role: .cancel) { }
             } message: {
                 Text(errorMessage)
             }
         }
         .overlay {
-            loadingView
-        }
-    }
-    
-    @ViewBuilder
-    private var loadingView: some View {
-        if isLoading && viewState == .initial {
-            ZStack {
-                Color.black.opacity(0.1)
-                    .ignoresSafeArea()
-                
-                ProgressView("Pobieranie...")
-                    .scaleEffect(1.2)
-                    .padding(30)
-                    .background(
-                        RoundedRectangle(cornerRadius: 15)
-                            .fill(.thickMaterial)
-                    )
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private var errorAlertContent: some View {
-        Button(
-            "Spróbuj ponownie",
-            action: {
-                retryFetchData()
-            }
-        )
-        Button("Anuluj", role: .cancel) { }
-    }
-    
-    private var initialView: some View {
-        VStack(spacing: 20) {
-            Image("rickAndMortyLogo")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 100)
-            
-            VStack(spacing: 8) {
-                Text("Brak bohaterów")
-                    .font(.title2.bold())
-                
-                Text("Naciśnij przycisk, aby wczytać listę postaci z serialu Rick and Morty.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            .padding(.horizontal, 40)
-            
-            Button(action: startInitialLoad) {
-                Text("Wczytaj listę")
-                    .fontWeight(.semibold)
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .padding(.horizontal, 50)
+            LoadingOverlay(isLoading: isLoading && viewState == .initial)
         }
     }
     
@@ -112,22 +58,12 @@ struct CharactersListView: View {
                 NavigationLink {
                     CharacterDetailsView(character: character)
                 } label: {
-                    HStack(spacing: 15) {
-                        KFImage(URL(string: character.image))
-                            .placeholder {  Image(systemName: "person.crop.circle.badge.exclamationmark") }
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 50, height: 50)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                        
-                        Text(character.name)
-                    }
-                    .padding(.vertical, 4)
-                    .onAppear {
-                        if character.id == characters.last?.id && hasMorePages && !isLoading {
-                            loadNextPage()
+                    CharacterRow(character: character)
+                        .onAppear {
+                            if character.id == characters.last?.id && hasMorePages && !isLoading {
+                                loadNextPage()
+                            }
                         }
-                    }
                 }
             }
             
