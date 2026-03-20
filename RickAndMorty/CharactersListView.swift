@@ -138,6 +138,23 @@ struct CharactersListView: View {
             }
         }
         .listStyle(.plain)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Wróć") {
+                    resetToInitialState()
+                }
+            }
+        }
+    }
+    
+    private func resetToInitialState() {
+        viewState = .initial
+            
+        characters = []
+        pageId = 1
+        hasMorePages = true
+        showErrorAlert = false
+        errorMessage = ""
     }
     
     private func startInitialLoad() {
@@ -145,6 +162,8 @@ struct CharactersListView: View {
         isLoading = true
         
         Task {
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            
             let success = await fetchData()
             
             isLoading = false
@@ -176,8 +195,6 @@ struct CharactersListView: View {
     }
 
     private func fetchData() async -> Bool {
-        //try? await Task.sleep(nanoseconds: 2_000_000_000)
-        
         do {
             let response = try await apiClient.fetchCharacters(page: pageId)
             characters.append(contentsOf: response.results)

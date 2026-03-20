@@ -14,11 +14,7 @@ protocol APIClientProtocol {
 
 final class APIClient: APIClientProtocol {
     
-    private let session: Session
-    
-    init(session: Session = .default) {
-        self.session = session
-    }
+    private let session: Session = .default
     
     func fetchCharacters(page: Int) async throws -> CharactersResponse {
         let request = session
@@ -31,7 +27,6 @@ final class APIClient: APIClientProtocol {
         case .success(let characterResponse):
             return characterResponse
         case .failure(let error):
-            // Tutaj możesz zmapować błąd na własny typ, np. APIError
             throw error
         }
     }
