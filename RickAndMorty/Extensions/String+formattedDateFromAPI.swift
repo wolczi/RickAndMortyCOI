@@ -19,7 +19,6 @@ extension String {
 
         let outputFormatter = DateFormatter()
         outputFormatter.dateStyle = .long
-        //outputFormatter.timeStyle = .none
         outputFormatter.locale = Locale(identifier: "pl_PL")
         
         return outputFormatter.string(from: date)
