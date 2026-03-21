@@ -16,7 +16,14 @@ protocol APIClientProtocol {
 
 final class APIClient: APIClientProtocol {
     
-    private let session: Session = .default
+    private let session: Session = {
+        let configuration = URLSessionConfiguration.default
+        
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.urlCache = nil
+        
+        return Session(configuration: configuration)
+    }()
     
     private func request<T: Decodable>(_ route: MovieRouter) async throws -> T {
         try await session

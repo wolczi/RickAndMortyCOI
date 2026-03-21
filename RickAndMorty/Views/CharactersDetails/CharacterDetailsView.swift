@@ -10,61 +10,33 @@ import Kingfisher
 
 struct CharacterDetailsView: View {
 
-    @EnvironmentObject private var favoritesManager: FavoritesManager
+    @StateObject private var viewModel: CharacterDetailsViewModel
     
-    let character: Character
+    init(character: Character) {
+        _viewModel = StateObject(wrappedValue: CharacterDetailsViewModel(character: character))
+    }
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                KFImage(URL(string: character.image))
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 300)
-                    .clipped()
-                    .shadow(radius: 10)
+            VStack(alignment: .leading, spacing: 0) {
+                CharacterHeaderImage(imageUrl: viewModel.character.image)
                 
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text(character.name)
-                            .font(.system(size: 32, weight: .bold))
-                        Spacer()
-                        
-                        Button(action: {
-                            favoritesManager.toggleFavorite(character.id)
-                        }, label: {
-                            Image(systemName: favoritesManager.isFavorite(character.id) ? "star.fill" : "star")
-                                .font(.title)
-                                .foregroundColor(.yellow)
-                        })
-                    }
+                VStack(alignment: .leading, spacing: 20) {
+                    CharacterPrimaryInfoSection(
+                        name: viewModel.character.name,
+                        status: viewModel.character.status,
+                        isFavorite: viewModel.isFavorite,
+                        onFavoriteToggle: viewModel.toggleFavorite
+                    )
                     
-                    StatusBadge(status: character.status)
+                    CharacterDetailedSpecsSection(character: viewModel.character)
                     
-                    Divider().padding(.vertical, 5)
-                    
-                    DetailRow(label: "Płeć", value: character.gender.localized, icon: "person.fill")
-                    DetailRow(label: "Pochodzenie", value: character.origin.name, icon: "globe")
-                    DetailRow(label: "Lokalizacja", value: character.location.name, icon: "mappin.and.ellipse")
+                    CharacterEpisodesSection(episodes: viewModel.character.episode)
                 }
-                .padding(.horizontal)
-                
-                VStack(alignment: .leading, spacing: 15) {
-                    Text("Odcinki")
-                        .font(.title2.bold())
-                        .padding(.horizontal)
-                    
-                    LazyVStack(spacing: 10) {
-                        ForEach(character.episode, id: \.self) { url in
-                            EpisodeRow(episodeURL: url)
-                        }
-                    }
-                    .padding(.horizontal)
-                }
+                .padding(.top, 20)
             }
         }
-        .navigationTitle(character.name)
+        .navigationTitle(viewModel.character.name)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct EpisodeRow: View {
     let episodeURL: String
     

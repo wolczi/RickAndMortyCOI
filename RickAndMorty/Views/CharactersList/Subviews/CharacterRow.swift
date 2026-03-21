@@ -10,7 +10,7 @@ import Kingfisher
 
 struct CharacterRow: View {
     let character: Character
-    @EnvironmentObject private var favoritesManager: FavoritesManager
+    let isFavorite: Bool
     
     var body: some View {
         HStack(spacing: 15) {
@@ -25,7 +25,7 @@ struct CharacterRow: View {
             
             Spacer()
             
-            if favoritesManager.isFavorite(character.id) {
+            if isFavorite {
                 Image(systemName: "star.fill")
                     .resizable()
                     .frame(width: 20, height: 20)

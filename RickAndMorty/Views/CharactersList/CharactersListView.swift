@@ -8,144 +8,67 @@
 import SwiftUI
 import Kingfisher
 
-@MainActor
 struct CharactersListView: View {
-    
-    enum ViewState {
-        case initial
-        case list
-    }
-    
-    @Environment(\.apiClient) private var apiClient
-    
-    @State private var viewState: ViewState = .initial
-    
-    @State private var characters: [Character] = []
-    
-    @State private var isLoading = false
-    @State private var pageId = 1
-    @State private var hasMorePages = true
-    
-    @State private var showErrorAlert = false
-    @State private var errorMessage = ""
+    @StateObject private var viewModel: CharactersListViewModel = .init()
     
     var body: some View {
         NavigationView {
             ZStack {
-                switch viewState {
+                switch viewModel.viewState {
                 case .initial:
-                    InitialView(action: startInitialLoad)
-                case .list:
-                    listView
+                    InitialView(action: viewModel.startInitialLoad)
+                    
+                case .loading:
+                    ProgressView("Pobieranie bohaterów...")
+                    
+                case .empty:
+                    NoCharactersView(action: viewModel.retryFetchData)
+                    
+                case .error:
+                    ErrorStateView(action: viewModel.retryFetchData)
+                    
+                case .list(let characters, let isPageLoading):
+                    listView(characters: characters, isPageLoading: isPageLoading)
                 }
             }
-            .alert("Błąd pobierania", isPresented: $showErrorAlert) {
-                Button("Spróbuj ponownie", action: retryFetchData)
-                Button("Anuluj", role: .cancel) { }
+            .navigationTitle("Lista bohaterów")
+            .alert("Błąd", isPresented: $viewModel.showErrorAlert) {
+                Button("Spróbuj ponownie", action: viewModel.retryFetchData)
+                Button("OK", role: .cancel) { }
             } message: {
-                Text(errorMessage)
+                Text("Nie udało się pobrać danych")
             }
-        }
-        .overlay {
-            LoadingOverlay(isLoading: isLoading && viewState == .initial)
         }
     }
     
-    private var listView: some View {
+    private func listView(characters: [Character], isPageLoading: Bool) -> some View {
         List {
             ForEach(characters) { character in
                 NavigationLink {
                     CharacterDetailsView(character: character)
                 } label: {
-                    CharacterRow(character: character)
-                        .onAppear {
-                            if character.id == characters.last?.id && hasMorePages && !isLoading {
-                                loadNextPage()
-                            }
-                        }
+                    CharacterRow(
+                        character: character,
+                        isFavorite: viewModel.favoritesManager.isFavorite(character.id)
+                    )
+                }
+                .onAppear {
+                    viewModel.loadNextPage(currentCharacter: character)
                 }
             }
             
-            if isLoading {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                        .id(UUID())
-                    Spacer()
-                }
-                .listRowSeparator(.hidden)
+            if isPageLoading {
+                ListLoadingIndicator()
+                    .id(UUID())
             }
         }
         .listStyle(.plain)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button("Wróć") {
-                    resetToInitialState()
+                    viewModel.resetToInitialState()
                 }
             }
-        }
-        .navigationTitle("Lista bohaterów")
-    }
-    
-    private func resetToInitialState() {
-        viewState = .initial
-            
-        characters = []
-        pageId = 1
-        hasMorePages = true
-        showErrorAlert = false
-        errorMessage = ""
-    }
-    
-    private func startInitialLoad() {
-        guard !isLoading else { return }
-        isLoading = true
-        
-        Task {
-            try? await Task.sleep(nanoseconds: 250_000_000)
-            
-            let success = await fetchData()
-            
-            isLoading = false
-            
-            if success {
-                viewState = .list
-            }
-        }
-    }
-
-    private func loadNextPage() {
-        guard !isLoading && hasMorePages else { return }
-        isLoading = true
-        
-        Task {
-            _ = await fetchData()
-            isLoading = false
-        }
-    }
-    
-    private func retryFetchData() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            if viewState == .initial {
-                startInitialLoad()
-            } else {
-                loadNextPage()
-            }
-        }
-    }
-
-    private func fetchData() async -> Bool {
-        do {
-            let response = try await apiClient.fetchCharacters(page: pageId)
-            characters.append(contentsOf: response.results)
-            hasMorePages = response.info.nextPageExist
-            pageId += 1
-            return true
-        } catch {
-            print("Błąd: \(error)")
-            errorMessage = "Nie udało się pobrać danych. Sprawdź połączenie."
-            showErrorAlert = true
-            return false
         }
     }
 }

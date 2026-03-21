@@ -8,53 +8,50 @@
 import SwiftUI
 
 struct EpisodeDetailsView: View {
-    let episodeID: Int
-    @Environment(\.apiClient) private var apiClient
+    @StateObject private var viewModel: EpisodeDetailsViewModel
     
-    @State private var episode: Episode?
-    @State private var isLoading = true
-    @State private var errorMessage: String?
-
+    init(episodeID: Int) {
+        _viewModel = StateObject(wrappedValue: EpisodeDetailsViewModel(episodeID: episodeID))
+    }
+    
     var body: some View {
-        List {
-            if let episode = episode {
-                Section(header: Text("Informacje ogólne")) {
-                    DetailRow(label: "Nazwa", value: episode.name, icon: "tv")
-                    DetailRow(label: "Data emisji", value: episode.airDate.formattedDateFromAPI(), icon: "calendar")
-                    DetailRow(label: "Kod odcinka", value: episode.episode, icon: "tag")
+        Group {
+            switch viewModel.viewState {
+            case .loading:
+                ProgressView("Pobieranie danych...")
+                
+            case .error(let message):
+                ErrorStateView(message: message) {
+                    Task { await viewModel.fetchEpisode() }
                 }
                 
-                Section(header: Text("Postacie")) {
-                    Text("W tym odcinku występuje \(episode.characters.count) postaci.")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
+            case .loaded(let episode):
+                EpisodeContentView(episode: episode)
             }
         }
         .navigationTitle("Szczegóły odcinka")
-        .overlay {
-            if isLoading {
-                ProgressView("Pobieranie danych...")
-            } else if let error = errorMessage {
-                VStack {
-                    Text(error).foregroundColor(.red)
-                    Button("Spróbuj ponownie") { Task { await fetchEpisode() } }
-                }
-            }
-        }
         .task {
-            await fetchEpisode()
+            await viewModel.fetchEpisode()
         }
     }
+}
 
-    private func fetchEpisode() async {
-        isLoading = true
-        do {
-            episode = try await apiClient.fetchEpisode(id: episodeID)
-            isLoading = false
-        } catch {
-            errorMessage = "Nie udało się wczytać odcinka"
-            isLoading = false
+private struct EpisodeContentView: View {
+    let episode: Episode
+    
+    var body: some View {
+        List {
+            Section(header: Text("Informacje ogólne")) {
+                DetailRow(label: "Nazwa", value: episode.name, icon: "tv")
+                DetailRow(label: "Data emisji", value: episode.airDate.formattedDateFromAPI(), icon: "calendar")
+                DetailRow(label: "Kod odcinka", value: episode.episode, icon: "tag")
+            }
+            
+            Section(header: Text("Postacie")) {
+                Text("W tym odcinku występuje \(episode.characters.count) postaci.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
         }
     }
 }

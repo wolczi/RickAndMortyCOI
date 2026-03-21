@@ -11,7 +11,7 @@ struct ListLoadingIndicator: View {
     var body: some View {
         HStack {
             Spacer()
-            ProgressView().id(UUID())
+            ProgressView()
             Spacer()
         }
         .listRowSeparator(.hidden)

@@ -79,6 +79,10 @@ struct Character: Decodable, Identifiable, Equatable {
     struct Origin: Decodable, Equatable {
         let name: String
         let url: String
+        
+        var displayName: String {
+            name.lowercased() == "unknown" ? "Nieznane" : name
+        }
     }
 
     static func == (lhs: Character, rhs: Character) -> Bool {

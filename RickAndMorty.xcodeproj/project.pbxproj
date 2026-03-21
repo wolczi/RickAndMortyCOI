@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		CE03E4DA2F6EB42D00E20B69 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = CE03E4D92F6EB42D00E20B69 /* ComposableArchitecture */; };
+		CE03E5202F6EBE0D00E20B69 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = CE03E51F2F6EBE0D00E20B69 /* Swinject */; };
 		CEA313322F6EB2C9008D6576 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = CEA313312F6EB2C9008D6576 /* Kingfisher */; };
 		CED231872F6EB3BF0013C5BA /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = CED231862F6EB3BF0013C5BA /* Alamofire */; };
 /* End PBXBuildFile section */
@@ -32,6 +33,7 @@
 				CED231872F6EB3BF0013C5BA /* Alamofire in Frameworks */,
 				CEA313322F6EB2C9008D6576 /* Kingfisher in Frameworks */,
 				CE03E4DA2F6EB42D00E20B69 /* ComposableArchitecture in Frameworks */,
+				CE03E5202F6EBE0D00E20B69 /* Swinject in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +79,7 @@
 				CEA313312F6EB2C9008D6576 /* Kingfisher */,
 				CED231862F6EB3BF0013C5BA /* Alamofire */,
 				CE03E4D92F6EB42D00E20B69 /* ComposableArchitecture */,
+				CE03E51F2F6EBE0D00E20B69 /* Swinject */,
 			);
 			productName = RickAndMorty;
 			productReference = CE2C4CCA2F6B335D00C7F049 /* RickAndMorty.app */;
@@ -111,6 +114,7 @@
 				CEA313302F6EB2C9008D6576 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				CED231852F6EB3BF0013C5BA /* XCRemoteSwiftPackageReference "Alamofire" */,
 				CE03E4D82F6EB42D00E20B69 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				CE03E51E2F6EBE0D00E20B69 /* XCRemoteSwiftPackageReference "Swinject" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CE2C4CCB2F6B335D00C7F049 /* Products */;
@@ -377,6 +381,14 @@
 				minimumVersion = 1.8.0;
 			};
 		};
+		CE03E51E2F6EBE0D00E20B69 /* XCRemoteSwiftPackageReference "Swinject" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Swinject/Swinject.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.0;
+			};
+		};
 		CEA313302F6EB2C9008D6576 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
@@ -400,6 +412,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CE03E4D82F6EB42D00E20B69 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
 			productName = ComposableArchitecture;
+		};
+		CE03E51F2F6EBE0D00E20B69 /* Swinject */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CE03E51E2F6EBE0D00E20B69 /* XCRemoteSwiftPackageReference "Swinject" */;
+			productName = Swinject;
 		};
 		CEA313312F6EB2C9008D6576 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
