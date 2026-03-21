@@ -20,7 +20,7 @@ struct EpisodeDetailsView: View {
             if let episode = episode {
                 Section(header: Text("Informacje ogólne")) {
                     DetailRow(label: "Nazwa", value: episode.name, icon: "tv")
-                    DetailRow(label: "Data emisji", value: episode.airDate, icon: "calendar")
+                    DetailRow(label: "Data emisji", value: episode.airDate.formattedDateFromAPI(), icon: "calendar")
                     DetailRow(label: "Kod odcinka", value: episode.episode, icon: "tag")
                 }
                 

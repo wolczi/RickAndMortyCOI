@@ -17,7 +17,6 @@ struct CharactersListView: View {
     }
     
     @Environment(\.apiClient) private var apiClient
-    @EnvironmentObject private var favoritesManager: FavoritesManager
     
     @State private var viewState: ViewState = .initial
     
