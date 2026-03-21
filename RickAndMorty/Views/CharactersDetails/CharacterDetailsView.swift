@@ -8,9 +8,6 @@
 import SwiftUI
 import Kingfisher
 
-import SwiftUI
-import Kingfisher
-
 struct CharacterDetailsView: View {
 
     @EnvironmentObject private var favoritesManager: FavoritesManager
