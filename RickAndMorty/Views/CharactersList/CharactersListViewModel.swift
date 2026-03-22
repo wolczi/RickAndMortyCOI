@@ -7,75 +7,51 @@
 
 import SwiftUI
 import Combine
+import Dependencies
 
 @MainActor
 final class CharactersListViewModel: ObservableObject {
-    @DIResolved private var apiClient: APIClientProtocol
-    @DIResolved var favoritesManager: FavoritesManager
+    @Dependency(\.apiClient) var apiClient
     
     enum ViewState: Equatable {
         case initial
         case loading
         case empty
-        case list([Character], isPageLoading: Bool)
+        case list([Character])
         case error
     }
     
     @Published private(set) var viewState: ViewState = .initial
     @Published private(set) var allCharacters: [Character] = []
-    @Published private(set) var isLoading = false
     
     @Published var showErrorAlert = false
     
+    private var isPageLoading = false
+    @Published var paginationFailed = false
+    
     private var pageId = 1
-    private var hasMorePages = true
-    private var cancellables = Set<AnyCancellable>()
-    
-    var showLoadingOverlay: Bool {
-        viewState == .loading
-    }
-    
-    init() {
-        setupSubscriptions()
-    }
-    
-    private func setupSubscriptions() {
-        favoritesManager.$favoriteIds
-            .dropFirst()
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.objectWillChange.send() }
-            .store(in: &cancellables)
-    }
+    var hasMorePages = true
     
     func startInitialLoad() {
+        resetToInitialState()
         viewState = .loading
-        
-        Task {
-            await fetchData()
-        }
+        Task { await fetchData() }
     }
     
-    func loadNextPage(currentCharacter character: Character) {
-        guard case .list(let currentList, let isPageLoading) = viewState,
-              !isPageLoading,
-              character.id == currentList.last?.id,
-              hasMorePages else { return }
-        
-        viewState = .list(allCharacters, isPageLoading: true)
-        
-        Task {
-            await fetchData()
-        }
+    func loadNextPage() {
+        guard !isPageLoading && !paginationFailed && hasMorePages else { return }
+        Task { await fetchData() }
     }
     
     private func fetchData() async {
-        try? await Task.sleep(nanoseconds: 250_000_000)
+        isPageLoading = true
         
         do {
             let response = try await apiClient.fetchCharacters(page: pageId)
             
             if pageId == 1 && response.results.isEmpty {
                 viewState = .empty
+                isPageLoading = false
                 return
             }
             
@@ -83,26 +59,29 @@ final class CharactersListViewModel: ObservableObject {
             hasMorePages = response.info.nextPageExist
             pageId += 1
             
-            viewState = .list(allCharacters, isPageLoading: false)
+            paginationFailed = false
+            viewState = .list(allCharacters)
             
         } catch {
             if allCharacters.isEmpty {
                 viewState = .error
             } else {
-                viewState = .list(allCharacters, isPageLoading: false)
+                paginationFailed = true
                 showErrorAlert = true
             }
         }
+        
+        isPageLoading = false
     }
     
     func retryFetchData() {
-        if !allCharacters.isEmpty {
-            viewState = .list(allCharacters, isPageLoading: true)
-        } else {
+        paginationFailed = false
+        
+        if allCharacters.isEmpty {
             viewState = .loading
         }
-        
-       Task { await fetchData() }
+
+        Task { await fetchData() }
     }
     
     func resetToInitialState() {
@@ -111,6 +90,7 @@ final class CharactersListViewModel: ObservableObject {
         pageId = 1
         hasMorePages = true
         showErrorAlert = false
+        paginationFailed = false
+        isPageLoading = false
     }
-
 }

@@ -7,10 +7,11 @@
 
 import SwiftUI
 import Combine
+import Dependencies
 
 @MainActor
 final class EpisodeDetailsViewModel: ObservableObject {
-    @DIResolved private var apiClient: APIClientProtocol
+    @Dependency(\.apiClient) var apiClient
     
     enum ViewState {
         case loading

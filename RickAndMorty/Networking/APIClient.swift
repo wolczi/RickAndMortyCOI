@@ -5,9 +5,9 @@
 //  Created by Przemek Wołczacki on 18/03/2026.
 //
 
-import Alamofire
 import Foundation
 import SwiftUI
+import Dependencies
 
 protocol APIClientProtocol {
     func fetchCharacters(page: Int) async throws -> CharactersResponse
@@ -15,78 +15,41 @@ protocol APIClientProtocol {
 }
 
 final class APIClient: APIClientProtocol {
-    
-    private let session: Session = {
-        let configuration = URLSessionConfiguration.default
+    private let session: URLSession
         
-        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
-        configuration.urlCache = nil
+        init(session: URLSession = .shared) {
+            let configuration = URLSessionConfiguration.default
+            configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+            self.session = URLSession(configuration: configuration)
+        }
         
-        return Session(configuration: configuration)
-    }()
-    
-    private func request<T: Decodable>(_ route: MovieRouter) async throws -> T {
-        try await session
-            .request(route)
-            .validate()
-            .serializingDecodable(T.self)
-            .value
-    }
-    
-    func fetchCharacters(page: Int) async throws -> CharactersResponse {
-        try await request(.getCharacters(page: page))
-    }
-    
-    func fetchEpisode(id: Int) async throws -> Episode {
-        try await request(.getEpisode(id: id))
-    }
+        private func request<T: Decodable>(_ route: APIRouter) async throws -> T {
+            let urlRequest = try route.asURLRequest()
+            
+            let (data, response) = try await session.data(for: urlRequest)
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                throw URLError(.badServerResponse)
+            }
+            
+            return try JSONDecoder().decode(T.self, from: data)
+        }
+        
+        func fetchCharacters(page: Int) async throws -> CharactersResponse {
+            try await request(.getCharacters(page: page))
+        }
+        
+        func fetchEpisode(id: Int) async throws -> Episode {
+            try await request(.getEpisode(id: id))
+        }
 }
 
-enum MovieRouter: URLRequestConvertible {
-    case getCharacters(page: Int)
-    case getEpisode(id: Int)
-
-    var baseURL: URL {
-        return URL(string: "https://rickandmortyapi.com/api")!
-    }
-
-    var path: String {
-        switch self {
-        case .getCharacters: return "/character"
-        case .getEpisode(let id): return "/episode/\(id)"
-        }
-    }
-    
-    var parameters: Parameters? {
-        switch self {
-        case .getCharacters(let page):
-            return ["page": page]
-        case .getEpisode:
-            return nil
-        }
-    }
-    
-    var method: HTTPMethod {
-        switch self {
-        case .getCharacters: return .get
-        case .getEpisode: return .get
-        }
-    }
-
-    func asURLRequest() throws -> URLRequest {
-        let url = baseURL.appendingPathComponent(path)
-        var request = URLRequest(url: url)
-        request.method = method
-        
-        return try URLEncoding.default.encode(request, with: parameters)
-    }
+enum APIClientKey: DependencyKey {
+    static let liveValue: APIClientProtocol = APIClient()
 }
 
-private struct APIClientKey: EnvironmentKey {
-    static let defaultValue: APIClientProtocol = APIClient()
-}
-
-extension EnvironmentValues {
+extension DependencyValues {
     var apiClient: APIClientProtocol {
         get { self[APIClientKey.self] }
         set { self[APIClientKey.self] = newValue }

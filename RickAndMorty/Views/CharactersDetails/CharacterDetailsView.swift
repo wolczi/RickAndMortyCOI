@@ -8,34 +8,27 @@
 import SwiftUI
 
 struct CharacterDetailsView: View {
-
-    @StateObject private var viewModel: CharacterDetailsViewModel
     
-    init(character: Character) {
-        _viewModel = StateObject(wrappedValue: CharacterDetailsViewModel(character: character))
-    }
+    @AppStorage("favorites_key") var favoriteIds: Set<Int> = []
+    
+    let character: Character
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                CharacterHeaderImage(imageUrl: viewModel.character.image)
+                CharacterHeaderImage(imageUrl: character.image)
                 
                 VStack(alignment: .leading, spacing: 20) {
-                    CharacterPrimaryInfoSection(
-                        name: viewModel.character.name,
-                        status: viewModel.character.status,
-                        isFavorite: viewModel.isFavorite,
-                        onFavoriteToggle: viewModel.toggleFavorite
-                    )
+                    CharacterPrimaryInfoSection(character: character)
                     
-                    CharacterDetailedSpecsSection(character: viewModel.character)
+                    CharacterDetailedSpecsSection(character: character)
                     
-                    CharacterEpisodesSection(episodes: viewModel.character.episode)
+                    CharacterEpisodesSection(episodes: character.episode)
                 }
                 .padding(.top, 20)
             }
         }
-        .navigationTitle(viewModel.character.name)
+        .navigationTitle(character.name)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

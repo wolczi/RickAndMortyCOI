@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct NoCharactersView: View {
-    let action: () -> Void
-    
     var body: some View {
         VStack(spacing: 20) {
             Image(systemName: "person.fill.questionmark")
@@ -24,11 +22,6 @@ struct NoCharactersView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
-            
-            Button("Odśwież") {
-                action()
-            }
-            .buttonStyle(.borderedProminent)
         }
     }
 }

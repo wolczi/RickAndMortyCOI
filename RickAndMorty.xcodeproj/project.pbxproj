@@ -10,7 +10,6 @@
 		CE03E4DA2F6EB42D00E20B69 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = CE03E4D92F6EB42D00E20B69 /* ComposableArchitecture */; };
 		CE03E5202F6EBE0D00E20B69 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = CE03E51F2F6EBE0D00E20B69 /* Swinject */; };
 		CEA313322F6EB2C9008D6576 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = CEA313312F6EB2C9008D6576 /* Kingfisher */; };
-		CED231872F6EB3BF0013C5BA /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = CED231862F6EB3BF0013C5BA /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,7 +29,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CED231872F6EB3BF0013C5BA /* Alamofire in Frameworks */,
 				CEA313322F6EB2C9008D6576 /* Kingfisher in Frameworks */,
 				CE03E4DA2F6EB42D00E20B69 /* ComposableArchitecture in Frameworks */,
 				CE03E5202F6EBE0D00E20B69 /* Swinject in Frameworks */,
@@ -77,7 +75,6 @@
 			name = RickAndMorty;
 			packageProductDependencies = (
 				CEA313312F6EB2C9008D6576 /* Kingfisher */,
-				CED231862F6EB3BF0013C5BA /* Alamofire */,
 				CE03E4D92F6EB42D00E20B69 /* ComposableArchitecture */,
 				CE03E51F2F6EBE0D00E20B69 /* Swinject */,
 			);
@@ -112,7 +109,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				CEA313302F6EB2C9008D6576 /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				CED231852F6EB3BF0013C5BA /* XCRemoteSwiftPackageReference "Alamofire" */,
 				CE03E4D82F6EB42D00E20B69 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 				CE03E51E2F6EBE0D00E20B69 /* XCRemoteSwiftPackageReference "Swinject" */,
 			);
@@ -397,14 +393,6 @@
 				minimumVersion = 8.8.0;
 			};
 		};
-		CED231852F6EB3BF0013C5BA /* XCRemoteSwiftPackageReference "Alamofire" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/Alamofire";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.11.1;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -422,11 +410,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CEA313302F6EB2C9008D6576 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
-		};
-		CED231862F6EB3BF0013C5BA /* Alamofire */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CED231852F6EB3BF0013C5BA /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

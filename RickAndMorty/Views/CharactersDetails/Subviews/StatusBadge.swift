@@ -15,8 +15,8 @@ struct StatusBadge: View {
             .font(.caption.bold())
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
-            .background(status == .alive ? Color.green.opacity(0.2) : status == .dead ? Color.red.opacity(0.2) : Color.gray.opacity(0.2))
-            .foregroundColor(status == .alive ? .green : status == .dead ? .red : .gray)
+            .background(status.color.opacity(0.2))
+            .foregroundColor(status.color)
             .cornerRadius(8)
     }
 }

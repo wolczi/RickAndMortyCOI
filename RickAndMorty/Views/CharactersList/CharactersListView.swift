@@ -9,6 +9,8 @@ import SwiftUI
 import Kingfisher
 
 struct CharactersListView: View {
+    @AppStorage("favorites_key") var favoriteIds: Set<Int> = []
+    
     @StateObject private var viewModel: CharactersListViewModel = .init()
     
     var body: some View {
@@ -22,13 +24,13 @@ struct CharactersListView: View {
                     ProgressView("Pobieranie bohaterów...")
                     
                 case .empty:
-                    NoCharactersView(action: viewModel.retryFetchData)
+                    NoCharactersView()
                     
                 case .error:
                     ErrorStateView(action: viewModel.retryFetchData)
                     
-                case .list(let characters, let isPageLoading):
-                    listView(characters: characters, isPageLoading: isPageLoading)
+                case .list(let characters):
+                    listView(characters: characters)
                 }
             }
             .navigationTitle("Lista bohaterów")
@@ -41,7 +43,7 @@ struct CharactersListView: View {
         }
     }
     
-    private func listView(characters: [Character], isPageLoading: Bool) -> some View {
+    private func listView(characters: [Character]) -> some View {
         List {
             ForEach(characters) { character in
                 NavigationLink {
@@ -49,26 +51,34 @@ struct CharactersListView: View {
                 } label: {
                     CharacterRow(
                         character: character,
-                        isFavorite: viewModel.favoritesManager.isFavorite(character.id)
+                        isFavorite: favoriteIds.contains(character.id)
                     )
-                }
-                .onAppear {
-                    viewModel.loadNextPage(currentCharacter: character)
                 }
             }
             
-            if isPageLoading {
-                ListLoadingIndicator()
-                    .id(UUID())
+            if viewModel.hasMorePages {
+                if viewModel.paginationFailed {
+                    Button(action: viewModel.retryFetchData) {
+                        HStack {
+                            Spacer()
+                            Text("Błąd ładowania. Spróbuj ponownie.")
+                                .foregroundColor(.blue)
+                            Spacer()
+                        }
+                    }
+                    .padding()
+                } else {
+                    ListLoadingIndicator()
+                        .id(UUID())
+                        .task {
+                            viewModel.loadNextPage()
+                        }
+                }
             }
         }
         .listStyle(.plain)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("Wróć") {
-                    viewModel.resetToInitialState()
-                }
-            }
+        .refreshable {
+            viewModel.startInitialLoad()
         }
     }
 }

@@ -40,17 +40,17 @@ struct Character: Decodable, Identifiable, Equatable {
         
         var localized: String {
             switch self {
-            case .alive: return "Żywy"
-            case .dead: return "Martwy"
-            case .unknown: return "Nieznany"
+            case .alive: "Żywy"
+            case .dead: "Martwy"
+            case .unknown: "Nieznany"
             }
         }
         
         var color: Color {
             switch self {
-            case .alive: return .green
-            case .dead: return .red
-            case .unknown: return .gray
+            case .alive: .green
+            case .dead: .red
+            case .unknown: .gray
             }
         }
     }
@@ -63,10 +63,10 @@ struct Character: Decodable, Identifiable, Equatable {
         
         var localized: String {
             switch self {
-            case .female: return "Kobieta"
-            case .male: return "Mężczyzna"
-            case .genderless: return "Bezpłciowy"
-            case .unknown: return "Nieznana"
+            case .female: "Kobieta"
+            case .male: "Mężczyzna"
+            case .genderless: "Bezpłciowy"
+            case .unknown: "Nieznana"
             }
         }
     }
@@ -83,9 +83,5 @@ struct Character: Decodable, Identifiable, Equatable {
         var displayName: String {
             name.lowercased() == "unknown" ? "Nieznane" : name
         }
-    }
-
-    static func == (lhs: Character, rhs: Character) -> Bool {
-        return lhs.id == rhs.id
     }
 }

@@ -14,13 +14,6 @@ struct CharacterRow: View {
     
     var body: some View {
         HStack(spacing: 15) {
-            KFImage(URL(string: character.image))
-                .placeholder { Image(systemName: "person.circle") }
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 50, height: 50)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-            
             Text(character.name)
             
             Spacer()
@@ -32,6 +25,6 @@ struct CharacterRow: View {
                     .foregroundStyle(.yellow)
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 20)
     }
 }

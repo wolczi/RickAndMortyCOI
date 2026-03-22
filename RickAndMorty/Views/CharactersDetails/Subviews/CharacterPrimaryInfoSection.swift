@@ -8,28 +8,33 @@
 import SwiftUI
 
 struct CharacterPrimaryInfoSection: View {
-    let name: String
-    let status: Character.Status
-    let isFavorite: Bool
-    let onFavoriteToggle: () -> Void
+    @AppStorage("favorites_key") var favoriteIds: Set<Int> = []
+
+    let character: Character
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
-                Text(name)
+                Text(character.name)
                     .font(.system(size: 32, weight: .bold))
                 
                 Spacer()
                 
-                Button(action: onFavoriteToggle) {
-                    Image(systemName: isFavorite ? "star.fill" : "star")
+                Button(action: {
+                    if favoriteIds.contains(character.id) {
+                        favoriteIds.remove(character.id)
+                    } else {
+                        favoriteIds.insert(character.id)
+                    }
+                }, label: {
+                    Image(systemName: favoriteIds.contains(character.id) ? "star.fill" : "star")
                         .font(.title2)
                         .foregroundColor(.yellow)
                         .contentShape(Rectangle())
-                }
+                })
             }
             
-            StatusBadge(status: status)
+            StatusBadge(status: character.status)
         }
         .padding(.horizontal)
     }
