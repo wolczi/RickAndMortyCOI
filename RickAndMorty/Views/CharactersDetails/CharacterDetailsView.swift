@@ -8,9 +8,7 @@
 import SwiftUI
 
 struct CharacterDetailsView: View {
-    
-    @AppStorage("favorites_key") var favoriteIds: Set<Int> = []
-    
+     
     let character: Character
     
     var body: some View {

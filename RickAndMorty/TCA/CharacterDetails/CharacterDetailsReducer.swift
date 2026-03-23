@@ -1,0 +1,54 @@
+//
+//  CharacterDetailsReducer.swift
+//  RickAndMorty
+//
+//  Created by Przemek Wołczacki on 23/03/2026.
+//
+
+import ComposableArchitecture
+import SwiftUI
+
+@Reducer
+struct CharacterDetailsReducer {
+    @ObservableState
+    struct State: Equatable {
+        let character: Character
+        var isFavorite: Bool = false
+    }
+    
+    enum Action {
+        case onAppear
+        case favoriteButtonTapped
+        case delegate(Delegate)
+        
+        enum Delegate {
+            case favoriteToggled
+        }
+    }
+    
+    @Dependency(\.favoritesManager) var favoritesManager
+    
+    func reduce(into state: inout State, action: Action) -> Effect<Action> {
+        switch action {
+        case .onAppear:
+            let favorites = favoritesManager.loadIds()
+            state.isFavorite = favorites.contains(state.character.id)
+            return .none
+            
+        case .favoriteButtonTapped:
+            state.isFavorite.toggle()
+            
+            var currentFavorites = favoritesManager.loadIds()
+            if state.isFavorite {
+                currentFavorites.insert(state.character.id)
+            } else {
+                currentFavorites.remove(state.character.id)
+            }
+            favoritesManager.saveIds(currentFavorites)
+            
+            return .send(.delegate(.favoriteToggled))
+        case .delegate:
+            return .none
+        }
+    }
+}

@@ -30,7 +30,6 @@ struct CharactersListViewTCA: View {
                     }
                 }
                 .navigationTitle("Lista bohaterów")
-                .onAppear { store.send(.onAppear) }
                 .alert(
                     "Błąd",
                     isPresented: Binding(
@@ -43,15 +42,22 @@ struct CharactersListViewTCA: View {
                 } message: {
                     Text("Nie udało się pobrać danych")
                 }
+                .onAppear {
+                    store.send(.onAppear)
+                }
             }
-        }
+
+       }
     }
     
     private func listView(characters: [Character]) -> some View {
         List {
             ForEach(characters) { character in
                 NavigationLink {
-                    CharacterDetailsView(character: character)
+                    CharacterDetailsViewTCA(store: Store(
+                        initialState: CharacterDetailsReducer.State(character: character),
+                        reducer: { CharacterDetailsReducer() }
+                    ))
                 } label: {
                     CharacterRow(
                         character: character,
