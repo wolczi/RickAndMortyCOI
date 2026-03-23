@@ -5,27 +5,23 @@
 //  Created by Przemek Wołczacki on 18/03/2026.
 //
 
-import Foundation
 import SwiftUI
-import Dependencies
+import ComposableArchitecture
 
-protocol APIClientProtocol {
-    func fetchCharacters(page: Int) async throws -> CharactersResponse
-    func fetchEpisode(id: Int) async throws -> Episode
+@DependencyClient
+struct APIClient {
+    var fetchCharacters: (_ page: Int) async throws -> CharactersResponse
+    var fetchEpisode: (_ id: Int) async throws -> Episode
 }
 
-final class APIClient: APIClientProtocol {
-    private let session: URLSession
+extension APIClient: DependencyKey {
+    static let liveValue: APIClient = {
+        let configuration = URLSessionConfiguration.default
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        let session = URLSession(configuration: configuration)
         
-        init(session: URLSession = .shared) {
-            let configuration = URLSessionConfiguration.default
-            configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
-            self.session = URLSession(configuration: configuration)
-        }
-        
-        private func request<T: Decodable>(_ route: APIRouter) async throws -> T {
+        @Sendable func request<T: Decodable>(_ route: APIRouter) async throws -> T {
             let urlRequest = try route.asURLRequest()
-            
             let (data, response) = try await session.data(for: urlRequest)
             
             guard let httpResponse = response as? HTTPURLResponse,
@@ -33,25 +29,25 @@ final class APIClient: APIClientProtocol {
                 throw URLError(.badServerResponse)
             }
             
-            return try JSONDecoder().decode(T.self, from: data)
+            let decoder = JSONDecoder()
+  
+            return try decoder.decode(T.self, from: data)
         }
         
-        func fetchCharacters(page: Int) async throws -> CharactersResponse {
-            try await request(.getCharacters(page: page))
-        }
-        
-        func fetchEpisode(id: Int) async throws -> Episode {
-            try await request(.getEpisode(id: id))
-        }
-}
-
-enum APIClientKey: DependencyKey {
-    static let liveValue: APIClientProtocol = APIClient()
+        return Self(
+            fetchCharacters: { page in
+                try await request(.getCharacters(page: page))
+            },
+            fetchEpisode: { id in
+                try await request(.getEpisode(id: id))
+            }
+        )
+    }()
 }
 
 extension DependencyValues {
-    var apiClient: APIClientProtocol {
-        get { self[APIClientKey.self] }
-        set { self[APIClientKey.self] = newValue }
+    var apiClient: APIClient {
+        get { self[APIClient.self] }
+        set { self[APIClient.self] = newValue }
     }
 }

@@ -29,7 +29,7 @@ enum APIRouter {
         }
     }
 
-    func asURLRequest() throws -> URLRequest {
+    nonisolated func asURLRequest() throws -> URLRequest {
         guard var components = URLComponents(string: baseURL + path) else {
             throw URLError(.badURL)
         }
