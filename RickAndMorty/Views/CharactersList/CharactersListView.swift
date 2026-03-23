@@ -58,15 +58,7 @@ struct CharactersListView: View {
             
             if viewModel.hasMorePages {
                 if viewModel.paginationFailed {
-                    Button(action: viewModel.retryFetchData) {
-                        HStack {
-                            Spacer()
-                            Text("Błąd ładowania. Spróbuj ponownie.")
-                                .foregroundColor(.blue)
-                            Spacer()
-                        }
-                    }
-                    .padding()
+                    paginationErrorView
                 } else {
                     ListLoadingIndicator()
                         .id(UUID())
@@ -80,5 +72,17 @@ struct CharactersListView: View {
         .refreshable {
             viewModel.startInitialLoad()
         }
+    }
+    
+    private var paginationErrorView: some View {
+        Button(action: viewModel.retryFetchData) {
+            HStack {
+                Spacer()
+                Text("Błąd ładowania. Spróbuj ponownie.")
+                    .foregroundColor(.blue)
+                Spacer()
+            }
+        }
+        .padding()
     }
 }

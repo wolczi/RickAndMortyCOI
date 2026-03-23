@@ -23,13 +23,13 @@ enum APIRouter {
     private var queryItems: [URLQueryItem]? {
         switch self {
         case .getCharacters(let page):
-            return [.init(name: "page", value: "\(page)")]
+            return [.init(name: "page", value: String(page))]
         case .getEpisode:
             return nil
         }
     }
 
-    nonisolated func asURLRequest() throws -> URLRequest {
+    func asURLRequest() throws -> URLRequest {
         guard var components = URLComponents(string: baseURL + path) else {
             throw URLError(.badURL)
         }

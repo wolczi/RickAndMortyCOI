@@ -8,10 +8,9 @@
 import SwiftUI
 import ComposableArchitecture
 
-@DependencyClient
-struct APIClient {
-    var fetchCharacters: (_ page: Int) async throws -> CharactersResponse
-    var fetchEpisode: (_ id: Int) async throws -> Episode
+struct APIClient: Sendable {
+    var fetchCharacters: @Sendable (_ page: Int) async throws -> CharactersResponse
+    var fetchEpisode: @Sendable (_ id: Int) async throws -> Episode
 }
 
 extension APIClient: DependencyKey {
@@ -21,7 +20,7 @@ extension APIClient: DependencyKey {
         let session = URLSession(configuration: configuration)
         
         @Sendable func request<T: Decodable>(_ route: APIRouter) async throws -> T {
-            let urlRequest = try route.asURLRequest()
+            let urlRequest = try await route.asURLRequest()
             let (data, response) = try await session.data(for: urlRequest)
             
             guard let httpResponse = response as? HTTPURLResponse,

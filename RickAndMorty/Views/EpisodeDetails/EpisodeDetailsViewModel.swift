@@ -31,7 +31,7 @@ final class EpisodeDetailsViewModel: ObservableObject {
         viewState = .loading
         
         do {
-            let episode = try await apiClient.fetchEpisode(id: episodeID)
+            let episode = try await apiClient.fetchEpisode(episodeID)
             viewState = .loaded(episode)
         } catch {
             viewState = .error("Nie udało się wczytać szczegółów odcinka.")

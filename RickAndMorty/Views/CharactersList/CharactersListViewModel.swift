@@ -47,7 +47,7 @@ final class CharactersListViewModel: ObservableObject {
         isPageLoading = true
         
         do {
-            let response = try await apiClient.fetchCharacters(page: pageId)
+            let response = try await apiClient.fetchCharacters(pageId)
             
             if pageId == 1 && response.results.isEmpty {
                 viewState = .empty
