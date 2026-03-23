@@ -17,24 +17,13 @@ struct CharacterDetailsReducer {
     }
     
     enum Action {
-        case onAppear
         case favoriteButtonTapped
-        case delegate(Delegate)
-        
-        enum Delegate {
-            case favoriteToggled
-        }
     }
     
     @Dependency(\.favoritesManager) var favoritesManager
     
     func reduce(into state: inout State, action: Action) -> Effect<Action> {
-        switch action {
-        case .onAppear:
-            let favorites = favoritesManager.loadIds()
-            state.isFavorite = favorites.contains(state.character.id)
-            return .none
-            
+        switch action {            
         case .favoriteButtonTapped:
             state.isFavorite.toggle()
             
@@ -46,8 +35,6 @@ struct CharacterDetailsReducer {
             }
             favoritesManager.saveIds(currentFavorites)
             
-            return .send(.delegate(.favoriteToggled))
-        case .delegate:
             return .none
         }
     }

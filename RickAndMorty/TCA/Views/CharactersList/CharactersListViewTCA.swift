@@ -53,15 +53,17 @@ struct CharactersListViewTCA: View {
     private func listView(characters: [Character]) -> some View {
         List {
             ForEach(characters) { character in
+                let isFavorite = store.favoriteIds.contains(character.id)
+                
                 NavigationLink {
                     CharacterDetailsViewTCA(store: Store(
-                        initialState: CharacterDetailsReducer.State(character: character),
+                        initialState: CharacterDetailsReducer.State(character: character, isFavorite: isFavorite),
                         reducer: { CharacterDetailsReducer() }
                     ))
                 } label: {
                     CharacterRow(
                         character: character,
-                        isFavorite: store.favoriteIds.contains(character.id)
+                        isFavorite: isFavorite
                     )
                 }
             }

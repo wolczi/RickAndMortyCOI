@@ -29,7 +29,6 @@ struct CharacterDetailsViewTCA: View {
             }
             .navigationTitle(store.character.name)
             .navigationBarTitleDisplayMode(.inline)
-            .onAppear { store.send(.onAppear) }
         }
     }
     

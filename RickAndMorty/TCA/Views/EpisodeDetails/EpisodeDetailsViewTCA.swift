@@ -1,37 +1,36 @@
 //
-//  EpisodeDetailsView.swift
+//  EpisodeDetailsViewTCA.swift
 //  RickAndMorty
 //
-//  Created by Przemek Wołczacki on 20/03/2026.
+//  Created by Przemek Wołczacki on 23/03/2026.
 //
 
 import SwiftUI
+import ComposableArchitecture
 
-struct EpisodeDetailsView: View {
-    @StateObject private var viewModel: EpisodeDetailsViewModel
-    
-    init(episodeID: Int) {
-        _viewModel = StateObject(wrappedValue: EpisodeDetailsViewModel(episodeID: episodeID))
-    }
+struct EpisodeDetailsViewTCA: View {
+    let store: StoreOf<EpisodeDetailsReducer>
     
     var body: some View {
-        Group {
-            switch viewModel.viewState {
-            case .loading:
-                ProgressView("Pobieranie danych...")
-                
-            case .error(let message):
-                ErrorStateView(message: message) {
-                    Task { await viewModel.fetchEpisode() }
+        WithPerceptionTracking {
+            Group {
+                switch store.viewState {
+                case .loading:
+                    ProgressView("Pobieranie danych...")
+                    
+                case let .error(message):
+                    ErrorStateView(message: message) {
+                        store.send(.fetchEpisode)
+                    }
+                    
+                case let .loaded(episode):
+                    EpisodeContentView(episode: episode)
                 }
-                
-            case .loaded(let episode):
-                EpisodeContentView(episode: episode)
             }
-        }
-        .navigationTitle("Szczegóły odcinka")
-        .task {
-            await viewModel.fetchEpisode()
+            .navigationTitle("Szczegóły odcinka")
+            .onAppear {
+                store.send(.onAppear)
+            }
         }
     }
 }

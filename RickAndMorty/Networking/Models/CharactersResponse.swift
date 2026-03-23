@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CharactersResponse: @nonisolated Decodable {
+struct CharactersResponse: Decodable {
     let info: Info
     let results: [Character]
 }

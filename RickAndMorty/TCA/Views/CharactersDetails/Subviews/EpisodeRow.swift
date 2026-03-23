@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 struct EpisodeRow: View {
     let episodeURL: String
@@ -15,7 +16,17 @@ struct EpisodeRow: View {
     }
     
     var body: some View {
-        NavigationLink(destination: EpisodeDetailsView(episodeID: episodeID)) {
+        NavigationLink(
+            destination: EpisodeDetailsViewTCA(
+                store: Store(
+                    initialState: EpisodeDetailsReducer.State(
+                        episodeID: episodeID
+                    ),
+                    reducer: {
+                        EpisodeDetailsReducer()
+                    })
+            )
+        ) {
             HStack {
                 Image(systemName: "tv")
                     .foregroundColor(.secondary)
