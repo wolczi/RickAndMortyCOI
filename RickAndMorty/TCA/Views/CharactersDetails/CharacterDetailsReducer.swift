@@ -15,10 +15,14 @@ struct CharacterDetailsReducer {
         var id: Int { character.id }
         let character: Character
         var isFavorite: Bool = false
+        
+        @Presents var episodeDetails: EpisodeDetailsReducer.State?
     }
     
     enum Action {
         case favoriteButtonTapped
+        case navigateToEpisodeDetails(Int)
+        case episodeDetails(PresentationAction<EpisodeDetailsReducer.Action>)
         case delegate(Delegate)
     }
     
@@ -29,22 +33,32 @@ struct CharacterDetailsReducer {
     
     @Dependency(\.favoritesManager) var favoritesManager
     
-    func reduce(into state: inout State, action: Action) -> Effect<Action> {
-        switch action {            
-        case .favoriteButtonTapped:
-            state.isFavorite.toggle()
-            
-            var currentFavorites = favoritesManager.loadIds()
-            if state.isFavorite {
-                currentFavorites.insert(state.character.id)
-            } else {
-                currentFavorites.remove(state.character.id)
+    var body: some Reducer<State, Action> {
+        Reduce { state, action in
+            switch action {
+            case .favoriteButtonTapped:
+                state.isFavorite.toggle()
+                
+                var currentFavorites = favoritesManager.loadIds()
+                if state.isFavorite {
+                    currentFavorites.insert(state.character.id)
+                } else {
+                    currentFavorites.remove(state.character.id)
+                }
+                favoritesManager.saveIds(currentFavorites)
+                
+                return .send(.delegate(.favoriteButtonTapped))
+            case .navigateToEpisodeDetails(let id):
+                state.episodeDetails = .init(episodeID: id)
+                return .none
+            case .episodeDetails:
+                return .none
+            case .delegate:
+                return .none
             }
-            favoritesManager.saveIds(currentFavorites)
-            
-            return .send(.delegate(.favoriteButtonTapped))
-        case .delegate:
-            return .none
+        }
+        .ifLet(\.$episodeDetails, action: \.episodeDetails) {
+            EpisodeDetailsReducer()
         }
     }
 }

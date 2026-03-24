@@ -10,13 +10,14 @@ import ComposableArchitecture
 @Reducer
 struct EpisodeDetailsReducer {
     @ObservableState
-    struct State: Equatable {
+    struct State: Equatable, Identifiable {
         enum ViewState: Equatable {
             case loading
             case loaded(Episode)
             case error(String)
         }
         
+        var id: Int { episodeID }
         let episodeID: Int
         var viewState: ViewState = .loading
     }
@@ -38,9 +39,11 @@ struct EpisodeDetailsReducer {
             case .fetchEpisode:
                 state.viewState = .loading
                 return .run { [id = state.episodeID] send in
-                    await send(.fetchResponse(
-                        TaskResult { try await apiClient.fetchEpisode(id) }
-                    ))
+                    await send(
+                        .fetchResponse(
+                            TaskResult { try await apiClient.fetchEpisode(id) }
+                        )
+                    )
                 }
                 
             case let .fetchResponse(.success(episode)):
