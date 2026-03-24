@@ -24,11 +24,11 @@ struct CharacterDetailsReducer {
         case navigateToEpisodeDetails(Int)
         case episodeDetails(PresentationAction<EpisodeDetailsReducer.Action>)
         case delegate(Delegate)
-    }
-    
-    @CasePathable
-    enum Delegate {
-        case favoriteButtonTapped
+        
+        @CasePathable
+        enum Delegate {
+            case favoriteButtonTapped
+        }
     }
     
     @Dependency(\.favoritesManager) var favoritesManager

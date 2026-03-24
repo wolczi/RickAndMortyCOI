@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import SwiftUI
 
 @Reducer
 struct CharactersListReducer {
@@ -25,9 +26,9 @@ struct CharactersListReducer {
         
         var pageId = 1
         var hasMorePages = true
-        var showErrorAlert = false
         
         @Presents var characterDetails: CharacterDetailsReducer.State?
+        @Presents var alert: AlertState<Action.Alert>?
     }
     
     enum Action {
@@ -35,9 +36,25 @@ struct CharactersListReducer {
         case loadNextPage
         case fetchResponse(TaskResult<CharactersResponse>)
         case retryFetchData
-        case dismissAlert
+        case showAlert
         case navigateToDetails(Character, Bool)
         case characterDetails(PresentationAction<CharacterDetailsReducer.Action>)
+        case alert(PresentationAction<Alert>)
+        
+        @CasePathable
+        enum Alert {
+            case retryFetchButtonTapped
+        }
+    }
+    
+    @Reducer
+    enum Destination {
+        case characterDetails(CharacterDetailsReducer)
+        case alert(AlertState<Alert>)
+        
+        enum Alert {
+            case retryFetchButtonTapped
+        }
     }
     
     @Dependency(\.apiClient) var apiClient
@@ -68,13 +85,14 @@ struct CharactersListReducer {
                 return .none
                 
             case .fetchResponse(.failure):
+                state.hasMorePages = false
+                
                 if state.allCharacters.isEmpty {
                     state.viewState = .error
+                    return .none
                 } else {
-                    state.showErrorAlert = true
+                    return .send(.showAlert)
                 }
-                state.hasMorePages = false
-                return .none
                 
             case .retryFetchData:
                 if state.allCharacters.isEmpty {
@@ -82,22 +100,42 @@ struct CharactersListReducer {
                 }
                 return .send(.loadNextPage)
                 
-            case .dismissAlert:
-                state.showErrorAlert = false
+            case .showAlert:
+                state.alert = .init(
+                    title: { TextState("Błąd") },
+                    actions: {
+                        ButtonState(role: .destructive, action: .retryFetchButtonTapped, label: { TextState("Spróbuj ponownie") })
+                        
+                        ButtonState(role: .cancel, label: { TextState("Ok") })
+                    },
+                    message: {
+                        TextState("Nie udało się pobrać danych")
+                    }
+                )
                 return .none
+
             case .navigateToDetails(let character, let isFavorite):
                 state.characterDetails = .init(character: character, isFavorite: isFavorite)
                 return .none
+                
             case .characterDetails(.presented(.delegate(.favoriteButtonTapped))):
                 state.favoriteIds = favoritesManager.loadIds()
                 return .none
+                
             case .characterDetails:
+                return .none
+                
+            case .alert(.presented(.retryFetchButtonTapped)):
+                return .send(.retryFetchData)
+                
+            case .alert:
                 return .none
             }
         }
         .ifLet(\.$characterDetails, action: \.characterDetails) {
             CharacterDetailsReducer()
         }
+        .ifLet(\.$alert, action: \.alert)
     }
     
     private func fetchCharactersEffect(pageId: Int) -> Effect<Action> {

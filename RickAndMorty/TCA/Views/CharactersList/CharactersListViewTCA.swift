@@ -10,7 +10,7 @@ import SwiftUI
 import ComposableArchitecture
 
 struct CharactersListViewTCA: View {
-    let store: StoreOf<CharactersListReducer>
+    @Perception.Bindable var store: StoreOf<CharactersListReducer>
     
     var body: some View {
         WithPerceptionTracking {
@@ -29,19 +29,8 @@ struct CharactersListViewTCA: View {
                         listView(characters: characters)
                     }
                 }
+                .alert(self.$store.scope(state: \.alert, action: \.alert))
                 .navigationTitle("Lista bohaterów")
-                .alert(
-                    "Błąd",
-                    isPresented: Binding(
-                        get: { store.showErrorAlert },
-                        set: { _ in store.send(.dismissAlert) }
-                    )
-                ) {
-                    Button("Spróbuj ponownie") { store.send(.retryFetchData) }
-                    Button("OK", role: .cancel) { }
-                } message: {
-                    Text("Nie udało się pobrać danych")
-                }
             }
 
        }
