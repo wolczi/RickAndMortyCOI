@@ -42,30 +42,29 @@ struct CharactersListViewTCA: View {
                 } message: {
                     Text("Nie udało się pobrać danych")
                 }
-                .onAppear {
-                    store.send(.onAppear)
-                }
             }
 
        }
     }
     
+    @ViewBuilder
     private func listView(characters: [Character]) -> some View {
         List {
             ForEach(characters) { character in
                 let isFavorite = store.favoriteIds.contains(character.id)
                 
-                NavigationLink {
-                    CharacterDetailsViewTCA(store: Store(
-                        initialState: CharacterDetailsReducer.State(character: character, isFavorite: isFavorite),
-                        reducer: { CharacterDetailsReducer() }
-                    ))
-                } label: {
-                    CharacterRow(
-                        character: character,
-                        isFavorite: isFavorite
-                    )
-                }
+                NavigationLinkStore(
+                    self.store.scope(state: \.$characterDetails, action: \.characterDetails),
+                    id: character.id,
+                    onTap: { self.store.send(.navigateToDetails(character, isFavorite)) },
+                    destination: CharacterDetailsViewTCA.init,
+                    label: {
+                        CharacterRow(
+                            character: character,
+                            isFavorite: isFavorite
+                        )
+                    }
+                )
             }
             
             if store.hasMorePages {

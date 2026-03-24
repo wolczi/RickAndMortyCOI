@@ -9,12 +9,14 @@ import SwiftUI
 import ComposableArchitecture
 
 @main
-struct RickAndMortyApp: App {    
+struct RickAndMortyApp: App {
+    @Dependency(\.favoritesManager) var favoritesManager
+    
     var body: some Scene {
         WindowGroup {
             CharactersListViewTCA(
                 store: Store(
-                    initialState: CharactersListReducer.State(),
+                    initialState: CharactersListReducer.State(favoriteIds: favoritesManager.loadIds()),
                     reducer: {
                         CharactersListReducer()
                     })

@@ -26,15 +26,18 @@ struct CharactersListReducer {
         var pageId = 1
         var hasMorePages = true
         var showErrorAlert = false
+        
+        @Presents var characterDetails: CharacterDetailsReducer.State?
     }
     
     enum Action {
-        case onAppear
         case startInitialLoad
         case loadNextPage
         case fetchResponse(TaskResult<CharactersResponse>)
         case retryFetchData
         case dismissAlert
+        case navigateToDetails(Character, Bool)
+        case characterDetails(PresentationAction<CharacterDetailsReducer.Action>)
     }
     
     @Dependency(\.apiClient) var apiClient
@@ -43,10 +46,6 @@ struct CharactersListReducer {
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
-            case .onAppear:
-                state.favoriteIds = favoritesManager.loadIds()
-                return .none
-                
             case .startInitialLoad:
                 state.viewState = .loading
           
@@ -86,7 +85,18 @@ struct CharactersListReducer {
             case .dismissAlert:
                 state.showErrorAlert = false
                 return .none
+            case .navigateToDetails(let character, let isFavorite):
+                state.characterDetails = .init(character: character, isFavorite: isFavorite)
+                return .none
+            case .characterDetails(.presented(.delegate(.favoriteButtonTapped))):
+                state.favoriteIds = favoritesManager.loadIds()
+                return .none
+            case .characterDetails:
+                return .none
             }
+        }
+        .ifLet(\.$characterDetails, action: \.characterDetails) {
+            CharacterDetailsReducer()
         }
     }
     

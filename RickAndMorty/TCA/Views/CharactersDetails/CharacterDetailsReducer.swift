@@ -11,12 +11,19 @@ import SwiftUI
 @Reducer
 struct CharacterDetailsReducer {
     @ObservableState
-    struct State: Equatable {
+    struct State: Equatable , Identifiable {
+        var id: Int { character.id }
         let character: Character
         var isFavorite: Bool = false
     }
     
     enum Action {
+        case favoriteButtonTapped
+        case delegate(Delegate)
+    }
+    
+    @CasePathable
+    enum Delegate {
         case favoriteButtonTapped
     }
     
@@ -35,6 +42,8 @@ struct CharacterDetailsReducer {
             }
             favoritesManager.saveIds(currentFavorites)
             
+            return .send(.delegate(.favoriteButtonTapped))
+        case .delegate:
             return .none
         }
     }
