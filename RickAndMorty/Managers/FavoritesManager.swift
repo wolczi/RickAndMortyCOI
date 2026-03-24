@@ -6,7 +6,7 @@
 //
 
 import Dependencies
-import SwiftUI
+import Foundation
 
 struct FavoritesManager {
     var loadIds: @Sendable () -> Set<Int>
@@ -14,16 +14,19 @@ struct FavoritesManager {
 }
 
 extension FavoritesManager: DependencyKey {
-    static let liveValue = Self(
-        loadIds: {
-            let data = UserDefaults.standard.data(forKey: "favorites_key") ?? Data()
-            return (try? JSONDecoder().decode(Set<Int>.self, from: data)) ?? []
-        },
-        saveIds: { ids in
-            let data = try? JSONEncoder().encode(ids)
-            UserDefaults.standard.set(data, forKey: "favorites_key")
-        }
-    )
+    static let liveValue: Self = {
+        let userDefaults = UserDefaults.standard
+        let key = "favorites_key"
+        
+        return Self(
+            loadIds: {
+                Set(userDefaults.array(forKey: key) as? [Int] ?? [])
+            },
+            saveIds: { ids in
+                userDefaults.set(Array(ids), forKey: key)
+            }
+        )
+    }()
 }
 
 extension DependencyValues {

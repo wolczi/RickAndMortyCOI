@@ -25,8 +25,6 @@ struct CharactersListReducer {
         
         var pageId = 1
         var hasMorePages = true
-        var isPageLoading = false
-        var paginationFailed = false
         var showErrorAlert = false
     }
     
@@ -51,56 +49,35 @@ struct CharactersListReducer {
                 
             case .startInitialLoad:
                 state.viewState = .loading
-                state.allCharacters = []
-                state.pageId = 1
-                state.hasMorePages = true
-                state.isPageLoading = true
-                return .run { [pageId = state.pageId] send in
-                    let result = await TaskResult {
-                        try await apiClient.fetchCharacters(pageId)
-                    }
-                    
-                    await send(.fetchResponse(result))
-                }
+          
+                return fetchCharactersEffect(pageId: state.pageId)
                 
             case .loadNextPage:
-                guard !state.isPageLoading, state.hasMorePages, !state.paginationFailed else { return .none }
-                state.isPageLoading = true
-                return .run { [pageId = state.pageId] send in
-                    let result = await TaskResult {
-                        try await apiClient.fetchCharacters(pageId)
-                    }
-                    
-                    await send(.fetchResponse(result))
-                }
+                return fetchCharactersEffect(pageId: state.pageId)
                 
             case let .fetchResponse(.success(response)):
-                state.isPageLoading = false
-                state.paginationFailed = false
-                
                 state.allCharacters.append(contentsOf: response.results)
                 state.hasMorePages = response.info.nextPageExist
-                state.pageId += 1
                 
-                if state.allCharacters.isEmpty {
-                    state.viewState = .empty
+                if state.pageId == 1 {
+                    state.viewState = state.allCharacters.isEmpty ? .empty : .list(state.allCharacters)
                 } else {
                     state.viewState = .list(state.allCharacters)
                 }
+                
+                state.pageId += 1
                 return .none
                 
             case .fetchResponse(.failure):
-                state.isPageLoading = false
                 if state.allCharacters.isEmpty {
                     state.viewState = .error
                 } else {
-                    state.paginationFailed = true
                     state.showErrorAlert = true
                 }
+                state.hasMorePages = false
                 return .none
                 
             case .retryFetchData:
-                state.paginationFailed = false
                 if state.allCharacters.isEmpty {
                     state.viewState = .loading
                 }
@@ -111,7 +88,18 @@ struct CharactersListReducer {
                 return .none
             }
         }
-        
+    }
+    
+    private func fetchCharactersEffect(pageId: Int) -> Effect<Action> {
+        .run { send in
+            await send(
+                .fetchResponse(
+                    TaskResult {
+                        try await apiClient.fetchCharacters(pageId)
+                    }
+                )
+            )
+        }
     }
     
 }

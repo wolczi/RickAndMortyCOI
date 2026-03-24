@@ -69,15 +69,11 @@ struct CharactersListViewTCA: View {
             }
             
             if store.hasMorePages {
-                if store.paginationFailed {
-                    paginationErrorView
-                } else {
-                    ListLoadingIndicator()
-                        .id(UUID())
-                        .onAppear {
-                            store.send(.loadNextPage)
-                        }
-                }
+                ListLoadingIndicator()
+                    .id(UUID())
+                    .onAppear {
+                        store.send(.loadNextPage)
+                    }
             }
         }
         .listStyle(.plain)
