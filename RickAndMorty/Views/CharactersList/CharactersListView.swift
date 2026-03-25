@@ -56,24 +56,12 @@ struct CharactersListView: View {
                 }
             }
             
-            if viewModel.hasMorePages {
-                if viewModel.paginationFailed {
-                    Button(action: viewModel.retryFetchData) {
-                        HStack {
-                            Spacer()
-                            Text("Błąd ładowania. Spróbuj ponownie.")
-                                .foregroundColor(.blue)
-                            Spacer()
-                        }
+            if viewModel.hasMorePages && !viewModel.paginationFailed {
+                ListLoadingIndicator()
+                    .id(UUID())
+                    .task {
+                        viewModel.loadNextPage()
                     }
-                    .padding()
-                } else {
-                    ListLoadingIndicator()
-                        .id(UUID())
-                        .task {
-                            viewModel.loadNextPage()
-                        }
-                }
             }
         }
         .listStyle(.plain)

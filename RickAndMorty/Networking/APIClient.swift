@@ -15,13 +15,7 @@ protocol APIClientProtocol {
 }
 
 final class APIClient: APIClientProtocol {
-    private let session: URLSession
-        
-        init(session: URLSession = .shared) {
-            let configuration = URLSessionConfiguration.default
-            configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
-            self.session = URLSession(configuration: configuration)
-        }
+    private let session: URLSession = .shared
         
         private func request<T: Decodable>(_ route: APIRouter) async throws -> T {
             let urlRequest = try route.asURLRequest()

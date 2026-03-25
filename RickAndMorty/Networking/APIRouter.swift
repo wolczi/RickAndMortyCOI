@@ -15,8 +15,8 @@ enum APIRouter {
 
     private var path: String {
         switch self {
-        case .getCharacters: return "/character"
-        case .getEpisode(let id): return "/episode/\(id)"
+        case .getCharacters: "/character"
+        case .getEpisode(let id): "/episode/\(id)"
         }
     }
 

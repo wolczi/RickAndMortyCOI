@@ -5,7 +5,7 @@
 //  Created by Przemek Wołczacki on 20/03/2026.
 //
 
-struct Episode: @nonisolated Decodable, Identifiable {
+struct Episode: Decodable, Identifiable {
     let id: Int
     let name: String
     let airDate: String

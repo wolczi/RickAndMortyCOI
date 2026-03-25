@@ -8,7 +8,7 @@
 import UIKit
 
 extension String {
-    func formattedDateFromAPI() -> String {
+    var formattedDateFromAPI: String {
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "MMMM d, yyyy"
         inputFormatter.locale = Locale(identifier: "en_US")

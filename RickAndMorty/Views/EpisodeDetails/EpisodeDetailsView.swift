@@ -43,7 +43,7 @@ private struct EpisodeContentView: View {
         List {
             Section(header: Text("Informacje ogólne")) {
                 DetailRow(label: "Nazwa", value: episode.name, icon: "tv")
-                DetailRow(label: "Data emisji", value: episode.airDate.formattedDateFromAPI(), icon: "calendar")
+                DetailRow(label: "Data emisji", value: episode.airDate.formattedDateFromAPI, icon: "calendar")
                 DetailRow(label: "Kod odcinka", value: episode.episode, icon: "tag")
             }
             
