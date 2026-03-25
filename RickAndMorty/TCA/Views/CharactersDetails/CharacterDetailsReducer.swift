@@ -16,19 +16,24 @@ struct CharacterDetailsReducer {
         let character: Character
         var isFavorite: Bool = false
         
-        @Presents var episodeDetails: EpisodeDetailsReducer.State?
+        @Presents var destination: Destination.State?
     }
     
     enum Action {
         case favoriteButtonTapped
         case navigateToEpisodeDetails(Int)
-        case episodeDetails(PresentationAction<EpisodeDetailsReducer.Action>)
+        case destination(PresentationAction<Destination.Action>)
         case delegate(Delegate)
-        
-        @CasePathable
-        enum Delegate {
-            case favoriteButtonTapped
-        }
+    }
+    
+    @CasePathable
+    enum Delegate {
+        case favoriteButtonTapped
+    }
+    
+    @Reducer(state: .equatable)
+    enum Destination {
+        case episodeDetails(EpisodeDetailsReducer)
     }
     
     @Dependency(\.favoritesManager) var favoritesManager
@@ -49,16 +54,16 @@ struct CharacterDetailsReducer {
                 
                 return .send(.delegate(.favoriteButtonTapped))
             case .navigateToEpisodeDetails(let id):
-                state.episodeDetails = .init(episodeID: id)
+                state.destination = .episodeDetails(.init(episodeID: id))
                 return .none
-            case .episodeDetails:
+                
+            case .destination:
                 return .none
+                
             case .delegate:
                 return .none
             }
         }
-        .ifLet(\.$episodeDetails, action: \.episodeDetails) {
-            EpisodeDetailsReducer()
-        }
+        .ifLet(\.$destination, action: \.destination)
     }
 }

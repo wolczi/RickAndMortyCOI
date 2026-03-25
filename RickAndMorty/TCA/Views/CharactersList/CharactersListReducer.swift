@@ -27,8 +27,7 @@ struct CharactersListReducer {
         var pageId = 1
         var hasMorePages = true
         
-        @Presents var characterDetails: CharacterDetailsReducer.State?
-        @Presents var alert: AlertState<Action.Alert>?
+        @Presents var destination: Destination.State?
     }
     
     enum Action {
@@ -38,16 +37,10 @@ struct CharactersListReducer {
         case retryFetchData
         case showAlert
         case navigateToDetails(Character, Bool)
-        case characterDetails(PresentationAction<CharacterDetailsReducer.Action>)
-        case alert(PresentationAction<Alert>)
-        
-        @CasePathable
-        enum Alert {
-            case retryFetchButtonTapped
-        }
+        case destination(PresentationAction<Destination.Action>)
     }
     
-    @Reducer
+    @Reducer(state: .equatable)
     enum Destination {
         case characterDetails(CharacterDetailsReducer)
         case alert(AlertState<Alert>)
@@ -101,41 +94,37 @@ struct CharactersListReducer {
                 return .send(.loadNextPage)
                 
             case .showAlert:
-                state.alert = .init(
-                    title: { TextState("Błąd") },
-                    actions: {
-                        ButtonState(role: .destructive, action: .retryFetchButtonTapped, label: { TextState("Spróbuj ponownie") })
-                        
-                        ButtonState(role: .cancel, label: { TextState("Ok") })
-                    },
-                    message: {
-                        TextState("Nie udało się pobrać danych")
-                    }
+                state.destination = .alert(
+                    AlertState(
+                        title: { TextState("Błąd") },
+                        actions: {
+                            ButtonState(role: .destructive, action: .retryFetchButtonTapped, label: { TextState("Spróbuj ponownie") })
+                            
+                            ButtonState(role: .cancel, label: { TextState("Ok") })
+                        },
+                        message: {
+                            TextState("Nie udało się pobrać danych")
+                        }
+                    )
                 )
                 return .none
 
             case .navigateToDetails(let character, let isFavorite):
-                state.characterDetails = .init(character: character, isFavorite: isFavorite)
+                state.destination = .characterDetails(.init(character: character, isFavorite: isFavorite))
                 return .none
-                
-            case .characterDetails(.presented(.delegate(.favoriteButtonTapped))):
+            
+            case .destination(.presented(.alert(.retryFetchButtonTapped))):
+                return .send(.loadNextPage)
+                            
+            case .destination(.presented(.characterDetails(.delegate(.favoriteButtonTapped)))):
                 state.favoriteIds = favoritesManager.loadIds()
                 return .none
                 
-            case .characterDetails:
-                return .none
-                
-            case .alert(.presented(.retryFetchButtonTapped)):
-                return .send(.retryFetchData)
-                
-            case .alert:
+            case .destination:
                 return .none
             }
         }
-        .ifLet(\.$characterDetails, action: \.characterDetails) {
-            CharacterDetailsReducer()
-        }
-        .ifLet(\.$alert, action: \.alert)
+        .ifLet(\.$destination, action: \.destination)
     }
     
     private func fetchCharactersEffect(pageId: Int) -> Effect<Action> {

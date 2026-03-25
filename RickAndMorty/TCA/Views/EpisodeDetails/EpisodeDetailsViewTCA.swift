@@ -23,7 +23,7 @@ struct EpisodeDetailsViewTCA: View {
                         store.send(.fetchEpisode)
                     }
                     
-                case let .loaded(episode):
+                case let .loadedEpisode(episode):
                     EpisodeContentView(episode: episode)
                 }
             }

@@ -97,7 +97,7 @@ struct CharacterDetailsViewTCA: View {
         let episodeID: Int = Int(episodeURL.components(separatedBy: "/").last ?? "") ?? 0
         
         NavigationLinkStore(
-            self.store.scope(state: \.$episodeDetails, action: \.episodeDetails),
+            self.store.scope(state: \.$destination.episodeDetails, action: \.destination.episodeDetails),
             id: episodeID,
             onTap: { self.store.send(.navigateToEpisodeDetails(episodeID)) },
             destination: EpisodeDetailsViewTCA.init,

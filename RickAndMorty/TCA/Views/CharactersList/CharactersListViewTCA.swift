@@ -29,7 +29,7 @@ struct CharactersListViewTCA: View {
                         listView(characters: characters)
                     }
                 }
-                .alert(self.$store.scope(state: \.alert, action: \.alert))
+                .alert(self.$store.scope(state: \.destination?.alert, action: \.destination.alert))
                 .navigationTitle("Lista bohaterów")
             }
 
@@ -43,7 +43,7 @@ struct CharactersListViewTCA: View {
                 let isFavorite = store.favoriteIds.contains(character.id)
                 
                 NavigationLinkStore(
-                    self.store.scope(state: \.$characterDetails, action: \.characterDetails),
+                    self.store.scope(state: \.$destination.characterDetails, action: \.destination.characterDetails),
                     id: character.id,
                     onTap: { self.store.send(.navigateToDetails(character, isFavorite)) },
                     destination: CharacterDetailsViewTCA.init,

@@ -1,3 +1,4 @@
+TCA architecture
 Zadanie rekrutacyjne COI, Przemysław Wołczacki
 
 <img width="200" height="500" alt="Simulator Screenshot - iphone 11 18 5 - 2026-03-21 at 16 32 32" src="https://github.com/user-attachments/assets/10d0f235-2ac3-4d5f-ae95-753b34be009a" />

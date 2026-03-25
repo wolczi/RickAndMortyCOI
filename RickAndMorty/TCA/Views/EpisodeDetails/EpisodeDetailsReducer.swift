@@ -13,7 +13,7 @@ struct EpisodeDetailsReducer {
     struct State: Equatable, Identifiable {
         enum ViewState: Equatable {
             case loading
-            case loaded(Episode)
+            case loadedEpisode(Episode)
             case error(String)
         }
         
@@ -47,7 +47,7 @@ struct EpisodeDetailsReducer {
                 }
                 
             case let .fetchResponse(.success(episode)):
-                state.viewState = .loaded(episode)
+                state.viewState = .loadedEpisode(episode)
                 return .none
                 
             case .fetchResponse(.failure):
