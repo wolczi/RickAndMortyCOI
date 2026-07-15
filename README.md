@@ -1,6 +1,8 @@
 <h1>TCA architecture</h1>
 <h3>Zadanie rekrutacyjne COI, Przemysław Wołczacki</h3><br><br>
 
+Zadanie pod linkiem: https://github.com/wolczi/RickAndMortyCOI/blob/TCA_architecture/COI%20-%20Zadanie%20Rekrutacyjne.pdf
+
 <img width="200" height="500" alt="Simulator Screenshot - iphone 11 18 5 - 2026-03-21 at 16 32 32" src="https://github.com/user-attachments/assets/10d0f235-2ac3-4d5f-ae95-753b34be009a" />
 
 <img width="200" height="500" alt="Simulator Screenshot - iphone 11 18 5 - 2026-03-22 at 15 31 34" src="https://github.com/user-attachments/assets/3aaf4fa0-1911-44fc-a0df-65c21078e18a" />
